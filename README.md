@@ -1,4 +1,4 @@
 Bukowskis Auction House
 =======================
 
-POC
+Proof of concept
