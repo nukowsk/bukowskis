@@ -1,0 +1,4 @@
+#!include:.gitignore
+./config/*
+./config/dev/geth/*
+.git
