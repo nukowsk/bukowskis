@@ -46,7 +46,7 @@ Auctions are conducted per source of the transaction stream.
 ```
 type Auction struct {
     height: ...
-    state: [open, sealed, settled, confirmed]
+    state: [open, closed, settled]
     confirmation: txHash
 }
 
@@ -57,9 +57,9 @@ ${source}/
 ```
 
 ### Bids
-
 ```
 type Bid struct {
+    height: ...
     bidder_id: ...
     amount: ...
 }
@@ -67,22 +67,24 @@ type Bid struct {
 #{source}/
     bids/
         #{height}/
-            bid_a: bid{ ... }
-            bid_b: bid{ ... }
+            #{bid_id}: Bid{ ... }
 ```
 
 ### Payments
 
 ```
+type Payment struct  {
+    id: ...
+    bid: Bid { }
+    status: [pending, confirmed]
+    confirmation: txHash
+}
+
 #{source}/
     payments/
         #{height}/
-            {
-                bidderId: ...
-                amount: ...
-                status: [pending, confirmed]
-                confirmation: txHash
-            }
+            #{payment_id}: Payment {...},
+            ...,
 ```
 
 ### State Machine
@@ -93,27 +95,26 @@ will be funneled into a single state machine that will facilitate
 deterministic testing. 
 
 Source - Events:
-    * Endpoint - Transaction
-    * Endpoint - Bid
-    * Blockchain - NewBlock
-    * Blockchain - Settlment
+* Endpoint - Transaction
+* Endpoint - Bid
+* Blockchain - NewBlock
+* Blockchain - Settlment
 
 ### Event Handling
-
 ```
 type Auction struct {
     ...
 }
 
-func (a ...) hanldeBid(bid){
+func (a ...) hanldeBid(bid) {
     // update bid and set winner for the block
 }
 
-func (a ...) handleTransaction(...) url {
+func (a ...) handleTransaction(transaction) url {
     // return the url 
 }
 
-func (a ...) handleNewBlock(...) {
+func (a ...) handleNewBlock(block) paymentTx {
     // initiate payment
 }
 
@@ -121,7 +122,7 @@ func (a ...) handleNewPayment(...) {
     // settlement payment
 }
 
-func (a ..) process(event) result {
+func (a ...) process(event) result {
     // demux the event to the handler and produce a result
 }
 ```
@@ -145,14 +146,13 @@ events := []event {
 result := auction.process(events)
 
 //  assert the balances after the auction has been conducted
-assert(result, map[id]balance{
+assert(result.Balances, map[d]balance{
     1: ...,
     2: ...,
 })
 ```
 
 ### Payment Processing
-
 Payments stored in firestore reflect the most up date account balances
 for bidders based on auction currently executing. Settlement
 transactions will be submmited to the blockchain and include an
@@ -162,7 +162,6 @@ attempts for the transaction to get accepted by the blockchain with
 multiple crashes in between.
 
 ## Consequences
-
 * Bukowskis provides a reliable auction service that settles payments
   fairly even under process instability
 * Bukowskis will synchronize state between processes, firestore and
