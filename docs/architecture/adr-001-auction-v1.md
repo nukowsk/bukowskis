@@ -17,8 +17,8 @@ In order to process payments, Bukowskis will control accounts on
 Ethereum for each bidder. Bidders can top up the account at any
 time. At the end of the block in which a bidder has won, the bid amount
 will be deducted from the appropriate account and pooled into a common
-account for later disbursement to users. This latter disbursement will 
-take the form of a merkle distrubution as in https://github.com/Uniswap/merkle-distributor
+account for later disbursement to users in the form of a [merkle
+distribution](https://github.com/Uniswap/merkle-distributor)
 
 ## Considerations
 In order to ensure reliable delivery of transactions which bidders have
@@ -77,7 +77,7 @@ type Bid struct {
 type Payment struct  {
     id: ...
     bid: Bid { }
-    status: [pending, confirmed]
+    status: [pending, confirmed, disbursed]
     confirmation: txHash
 }
 
@@ -90,7 +90,7 @@ type Payment struct  {
 
 ### State Machine
 The core logic of Bukowskis will be modeled as a state machine which
-will respond the events. Events will come in from multiple sources
+will respond to events. Events will come in from multiple sources
 including subscription to full nodes and the Bukowskis http endpoint but
 will be funneled into a single state machine that will facilitate
 deterministic testing. 
